@@ -2,3 +2,4 @@
 这是一个数据分析项目
 功能一共主要有八个
 第一、 分析数据的流量
+step2 analysis web information
