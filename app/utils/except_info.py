@@ -1,1 +1,1 @@
-print()
+print("HELLO PERFECT")
