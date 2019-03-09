@@ -12,5 +12,6 @@ numpy
 pandas
 mxnet
 facenet
-haddop
+hadoop
 spark
+maven
