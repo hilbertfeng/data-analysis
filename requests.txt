@@ -1,0 +1,16 @@
+scapy
+tensorflow
+scipy
+caffe
+geoip2
+request
+flask
+flask_login
+flask_cache
+redies_io
+numpy
+pandas
+mxnet
+facenet
+haddop
+spark
