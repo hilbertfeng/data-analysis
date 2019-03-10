@@ -12,6 +12,7 @@ from .utils.flow_analyzer import time_flow, data_flow, get_host_ip, data_in_out_
 from .utils.ipmap_tools import getmyip, get_ipmap, get_geo
 from .utils.data_extract import web_data, telnet_ftp_data, mail_data, sen_data, client_info
 from .utils.file_extract import web_file, ftp_file, mail_file, all_files
+from .utils.except_info import *
 from scapy.all import rdpcap
 import os
 import hashlib
@@ -296,3 +297,108 @@ def exceptinfo():
     if PCAPS == None:
         flash("请先上传要分析的数据包!")
         return redirect(url_for('upload'))
+    else:
+        dataid = request.args.get('id')
+        host_ip = get_host_ip(PCAPS)
+        warning_list = exception_warning(PCAPS, host_ip)
+        if dataid:
+            if warning_list[int(dataid)-1]['data']:
+
+                return warning_list[int(dataid)-1]['data'].replace('\r\n', '<br>')
+            else:
+                return '<center><h3>Not relational data packet</h3></center>'
+        else:
+            return render_template('./exceptions/exception.html', warning=warning_list)
+
+
+# --------------------------------------------- file extract ---------------------------------------------
+# web file extract
+@app.route('/webfile/', methods=['POST', 'GET'])
+def webfile():
+    if PCAPS == None:
+        flash("upload file please")
+        return redirect(url_for('upload'))
+    else:
+        host_ip = get_host_ip(PCAPS)
+        filepath = app.config['FILE_FOLDER'] + 'Web/'
+        web_list = web_file(PCAPS, host_ip, filepath)
+        file_dict = dict()
+        for web in web_list:
+            file_dict[os.path.split('filename')[-1]] = web['filename']
+        file = request.args.get('file')
+        if file in file_dict:
+            filename = hashlib.md5(file.encode('UTF-8').hexdigest() + '.'+file.split('.')[-1])
+            os.rename(filepath+file, filepath+filename, as_attachment=True)
+        else:
+            return render_template('./fileextract/webfile.html', web_list=list)
+
+
+# Mail file extract
+@app.route('/mailfile/', methods=['POST', 'GET'])
+def mailfile():
+    if PCAPS == None:
+        flash("upload file please")
+        return redirect(url_for('upload'))
+    else:
+        host_ip = get_host_ip(PCAPS)
+        filepath = app.config['FILE_FOLDER']+'Mail/'
+        mail_list = mail_file(PCAPS, host_ip, filepath)
+        file_dict = dict()
+    for mail in mail_list():
+        file_dict[os.path.split(mail['filename'])[-1]] = mail['filename']
+    file = request.args.get('file')
+    if file in file_dict:
+        filename = hashlib.md5(file.encode('UTF-8')).hexdigest() + '.' + file.split(':')[-1]
+        os.rename(filepath+file, filepath+filename)
+        return send_from_directory(filepath, filename, as_attachment=True)
+    else:
+        return render_template('./fileextract/mailfile.html', mail_list=mail_list)
+
+# FTP File extract
+@app.route('/ftpfile/', methods=['POST', 'GET'])
+def ftpfile():
+    if PCAPS == None:
+        flash("upload file please")
+        return redirect(url_for('upload'))
+    else:
+        host_ip = get_host_ip(PCAPS)
+        filepath = app.config['FILE_FOLDER'] + 'FTP/'
+        ftp_list = ftp_file(PCAPS, host_ip, filepath)
+        file_dict = dict()
+        for ftp in ftp_list:
+            file_dict[os.path.split(ftp['filename'])[-1]] = ftp['filename']
+        file = request.args.get['file']
+        if file in file_dict:
+            filename = hashlib.md5(file.encode('UTF-8')).hexdigest()+'.'+file.split('.')[-1]
+            os.rename(filepath+file, filepath+filename)
+            return send_from_directory(filepath, filename, as_attachment=True)
+        else:
+            return render_template('./fileextract/ftpfile.html')
+
+
+# all binary file extract
+@app.route('/allfile/', methods=['POST', 'GET'])
+def allfile():
+    if PCAPS == None:
+        flash("upload file please")
+        return redirect(url_for('upload'))
+    else:
+        filepath = app.config['FILE_FOLDER']+'All/'
+        allfiles_dict = all_files(PCAPS, filepath)
+        file = request.args.get('file')
+        if file in allfiles_dict:
+            filename = hashlib.md5(file.encode('UTF-8')).hexdigest()+'.'+file.split('.')[-1]
+            os.rename(filepath+file, filepath+filename)
+            return send_from_directory(filepath, filename, as_attachment=True)
+        else:
+            return render_template('./fileextract/allfile.html', allfiles_dict=allfiles_dict)
+
+
+@app.errorhandler(404)
+def internal_error():
+    return render_template('./error/404.html')
+
+@app.errorhandler(500)
+def internal_error():
+    return render_template('./error/505.html')
+

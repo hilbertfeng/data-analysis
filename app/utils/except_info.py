@@ -64,7 +64,7 @@ def web_warning(PCAPS, host_ip):
     web_patternu = re.compile(r'((txtUid|username|user|name)=(.*?))&', re.I)
     web_patternp = re.compile(r'((txtPwd|password|pwd|passwd)=(.*?)&)', re.I)
     tomcat_pattern = re.compile(r'Authorization: Basic(.*)')
-    for web in web_data:
+    for web in webdata:
         data = web['data']
         # HTTP brute force
         username = web_patternu.findall(data)
@@ -122,7 +122,7 @@ def arp_warning(PCAPS):
         if arp['src'] in arpsrc_dict:
             arpsrc_dict[arp['src']].append(arp['summary'])
         else:
-            arpsrc_dict[arp['src']].append(arp['summary'])
+            arpsrc_dict[arp['src']] = [arp['summary']]
     for src, summary in arpsrc_dict.items():
         if len(set(summary)) == 1:
             pass
