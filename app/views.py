@@ -36,9 +36,7 @@ def index():
 # 数据包上传
 @app.route('/upload/', methods=['POST', 'GET'])
 def upload():
-    print('hello.........')
     filepath = app.config['UPLOAD_FOLDER']
-    print('up path:', filepath)
     upload = Upload()
     if request.method == 'GET':
         return render_template('./upload/upload.html')
@@ -49,17 +47,11 @@ def upload():
             if allowed_file(pcapname):
                 name1 = random_name()
                 name2 = get_filetype(pcapname)
-                print("f1 f2: ", name1, name2)
                 global PCAP_NAME, PCAPS
                 PCAP_NAME = name1 + name2
                 try:
-                    print("trying action")
                     pcap.save(os.path.join(filepath, PCAP_NAME))
-                    print("save;;;")
-                    print(os.path.join(filepath, name1+name2))
                     PCAPS = rdpcap(os.path.join(filepath, PCAP_NAME))
-
-                    print("PCAPS: ", PCAPS)
                     os.system('rm -rf ' + filepath + '*')
                     flash('恭喜你,上传成功！')
                     return render_template('./upload/upload.html')

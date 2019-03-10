@@ -10,7 +10,7 @@ class Upload(Form):
 
 class ProtoFilter(Form):
     value = FileField('value')
-    fileter_type = FileField('filter_type', validators=[DataRequired(), AnyOf(u'all'
+    filter_type = FileField('filter_type', validators=[DataRequired(), AnyOf(u'all'
                                                                               u'proto',u'ipsrc',u'ipdst')])
 
 class UserFilter(Form):
